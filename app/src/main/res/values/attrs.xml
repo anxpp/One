@@ -1,0 +1,33 @@
+<resources>
+
+    <!-- Declare custom theme attributes that allow changing which styles are
+         used for button bars depending on the API level.
+         ?android:attr/buttonBarStyle is new as of API 11 so this is
+         necessary to support previous API levels. -->
+    <declare-styleable name="ButtonBarContainerTheme">
+        <attr name="metaButtonBarStyle" format="reference" />
+        <attr name="metaButtonBarButtonStyle" format="reference" />
+    </declare-styleable>
+
+    <!--HProgressBarLoading-->
+    <declare-styleable name="hprogress">
+        <attr name="progress" format="integer"/>
+        <attr name="max" format="integer"/>
+        <attr name="progressHeight" format="integer"/>
+        <attr name="progressColor" format="color"/>
+    </declare-styleable>
+
+    <declare-styleable name="BatRecyclerView">
+        <attr name="list_background" format="color" />
+        <attr name="hint_color" format="color" />
+        <attr name="show_divider" format="boolean" />
+        <attr name="divider_color" format="color" />
+        <attr name="cursor_color" format="color" />
+        <attr name="cursor_drawable" format="reference" />
+        <attr name="plus_color" format="color" />
+        <attr name="radio_button_color" format="color" />
+        <attr name="radio_button_res" format="reference" />
+        <attr name="add_button_color" format="reference" />
+        <attr name="hint" format="string" />
+    </declare-styleable>
+</resources>

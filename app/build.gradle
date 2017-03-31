@@ -1,0 +1,79 @@
+apply plugin: 'com.android.application'
+apply plugin: 'android-apt'
+apply plugin: 'com.jakewharton.butterknife'
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.anxpp.one"
+        minSdkVersion 18
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    dexOptions {
+        incremental true
+        javaMaxHeapSize "4g"
+    }
+    compileOptions {
+        targetCompatibility 1.7
+        sourceCompatibility 1.7
+    }
+}
+
+allprojects {
+    repositories {
+        maven { url "https://jitpack.io" }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.3.0'
+    compile 'com.android.support:design:25.3.0'
+    compile 'com.android.support:support-v4:25.3.0'
+    compile 'com.android.support:support-vector-drawable:25.3.0'
+    compile 'com.ashokvarma.android:bottom-navigation-bar:1.4.1'
+    compile 'com.google.android.gms:play-services:10.2.0'
+    testCompile 'junit:junit:4.12'
+
+    //RX
+    compile('io.reactivex:rxandroid:1.1.0') {
+        exclude module: 'rxjava'
+    }
+    compile 'io.reactivex:rxjava:1.1.0'
+    compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
+
+    compile 'com.jakewharton:butterknife:8.2.1'
+    apply plugin: 'android-apt'
+    apt 'com.jakewharton:butterknife-compiler:8.2.1'
+
+    compile 'com.github.satyan:sugar:1.5'
+
+    compile 'com.facebook.fresco:fresco:0.13.0'
+
+    compile 'com.github.Yalantis:SearchFilter:v1.0.3'
+    compile 'com.yalantis:phoenix:1.2.3'
+
+    compile 'com.squareup.okhttp3:okhttp:3.6.0'
+
+    compile 'com.wang.avi:library:2.1.3'
+
+    compile 'com.github.Aspsine:SwipeToLoadLayout:1.0.4'
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.0'
+
+}

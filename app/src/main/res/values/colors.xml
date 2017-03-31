@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="black_overlay">#66000000</color>
+    <color name="gray">#666666</color>
+    <color name="white">#ffffff</color>
+
+    <color name="colorBlue">#08ADEF</color>
+    <color name="colorBlueLight">#BBCEE4</color>
+    <color name="colorBlueLightBackground">#94DEFF</color>
+    <color name="colorGrey">#DEDEDE</color>
+    <color name="colorTransparent">#00ffffff</color>
+    <color name="colorTexts">#383939</color>
+    <color name="colorButtonDisabled">#EFEFF1</color>
+    <color name="colorButtonEnabled">#96CCEB</color>
+    <color name="colorDivider">#EEEEF0</color>
+
+    <color name="colorAll">#827f93</color>
+    <array name="colors">
+        <item name="all" type="color">#827f93</item>
+        <item name="design" type="color">#c467f4</item>
+        <item name="ios" type="color">#3b9aee</item>
+        <item name="android" type="color">#9bc53d</item>
+        <item name="web" type="color">#f4a261</item>
+        <item name="business" type="color">#1ed2bb</item>
+        <item name="research" type="color">#778da9</item>
+        <item name="sales" type="color">#20bf55</item>
+        <item name="quality" type="color">#9f9fed</item>
+        <item name="customer" type="color">#fc6177</item>
+        <item name="other" type="color">#bcbcbc</item>
+    </array>
+
+
+    <color name="style_color_accent">#d32f2f</color>
+    <color name="style_window_background">#212121</color>
+    <color name="style_window_background_light">#ffffff</color>
+
+    <color name="black">#000000</color>
+    <color name="red">#ff0000</color>
+
+    <color name="google_blue">#4285F4</color>
+    <color name="google_red">#EA4335</color>
+    <color name="google_green">#34A853</color>
+    <color name="google_yellow">#FBBC05</color>
+
+    <color name="yalantis_saffron">#F4B63E</color>
+    <color name="yalantis_eggplant">#663D4E</color>
+    <color name="yalantis_sienna">#EB6460</color>
+
+    <color name="divider">#b2b6c6</color>
+</resources>

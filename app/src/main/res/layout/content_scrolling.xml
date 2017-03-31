@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.anxpp.one.activity.ArticleDetailsActivity"
+    tools:showIn="@layout/activity_scrolling">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <WebView
+            android:id="@+id/article_webView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!--整体相对布局,覆盖于顶部-->
+        <com.anxpp.one.plus.HProgressBarLoading
+            android:id="@+id/top_progress"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            app:max="100"
+            app:progressColor="#0AC416"
+            app:progressHeight="8" />
+
+        <TextView
+            android:id="@+id/tv_center_badnet"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="轻触屏幕重新加载"
+            android:textColor="@color/gray"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:visibility="invisible" />
+    </FrameLayout>
+
+</android.support.v4.widget.NestedScrollView>
