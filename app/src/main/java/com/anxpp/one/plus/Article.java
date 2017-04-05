@@ -3,6 +3,7 @@ package com.anxpp.one.plus;
 import java.util.List;
 
 /**
+ * 文章
  * Created by anxpp.com on 16.09.16.
  */
 public class Article {

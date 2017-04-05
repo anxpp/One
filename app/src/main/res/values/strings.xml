@@ -212,4 +212,5 @@
         <item>Customer support</item>
         <item>Other</item>
     </string-array>
+    <string name="title_activity_start">StartActivity</string>
 </resources>

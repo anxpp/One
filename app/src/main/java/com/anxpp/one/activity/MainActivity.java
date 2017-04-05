@@ -18,6 +18,7 @@ import com.anxpp.one.R;
 import com.anxpp.one.fragment.HomeFragment;
 import com.anxpp.one.fragment.PersonFragment;
 import com.anxpp.one.fragment.BlogFragment;
+import com.anxpp.one.service.ImService;
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 
@@ -44,7 +45,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         getSupportFragmentManager().beginTransaction().add(R.id.container,fragments[0]).commit();
-
+        //开启服务
+        startService(new Intent(this, ImService.class));
+        startActivity(new Intent(this, StartActivity.class));
         initNav();
     }
 
@@ -108,23 +111,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -154,7 +150,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(new Intent(this, LoginActivity.class));
                 break;
             case R.id.nav_send:
-                startActivity(new Intent(this, TabbedActivity.class));
+//                startActivity(new Intent(this, TabbedActivity.class));
+                startActivity(new Intent(this, StartActivity.class));
                 break;
         }
 

@@ -18,6 +18,9 @@
     <dimen name="load_more_footer_height_classic">60dp</dimen>
 
 
+    <dimen name="cpb_stroke_width">4dp</dimen>
+
+
     <dimen name="add_view_size">24dp</dimen>
     <dimen name="header_translation">16dp</dimen>
     <dimen name="cursor_height">24dp</dimen>

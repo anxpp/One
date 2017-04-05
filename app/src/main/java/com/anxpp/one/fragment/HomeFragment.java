@@ -3,6 +3,7 @@ package com.anxpp.one.fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.util.DiffUtil;
@@ -41,6 +42,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -48,7 +50,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class HomeFragment extends Fragment implements FilterListener<Tag> {
+public class HomeFragment extends Fragment {
 
     //下拉刷新、上拉加载
     private SwipeToLoadLayout swipeToLoadLayout;
@@ -61,7 +63,9 @@ public class HomeFragment extends Fragment implements FilterListener<Tag> {
     private final String TAG = HomeFragment.class.getSimpleName();
 
     private List<Article> mAllArticles = new ArrayList<>();
+
     private Filter<Tag> mFilter;
+
     private ArticleAdapter articleAdapter;
 
     private final List<Tag> tagsForFilter = new ArrayList<>();
@@ -85,8 +89,50 @@ public class HomeFragment extends Fragment implements FilterListener<Tag> {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        //文章筛选器
+        FilterListener<Tag> filterListener = new FilterListener<Tag>() {
+            @Override
+            public void onFiltersSelected(@NotNull ArrayList<Tag> filters) {
+                Log.i(TAG, "onFiltersSelected");
+                List<Article> newArticles = findByTags(filters);
+                List<Article> oldArticles = articleAdapter.getArticles();
+                articleAdapter.setArticles(newArticles);
+                calculateDiff(oldArticles, newArticles);
+            }
+
+            @Override
+            public void onNothingSelected() {
+                if (mRecyclerView != null) {
+                    articleAdapter.setArticles(mAllArticles);
+                    articleAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onFilterSelected(Tag tag) {
+                Log.i(TAG, "onFilterSelected");
+                if (tag.getText().equals(tagsForFilter.get(0).getText())) {
+                    mFilter.deselectAll();
+                    mFilter.collapse();
+                }
+            }
+
+            @Override
+            public void onFilterDeselected(Tag tag) {
+                Log.i(TAG, "onFilterDeselected");
+            }
+        };
+        mFilter = (Filter<Tag>) activity.findViewById(R.id.filter);
+        tagsForFilter.add(new Tag("全部", -456356));
+        tagsForFilter.add(new Tag("csdn干货", 456412));
+        tagsForFilter.add(new Tag("第54期", 456412));
+        mFilter.setAdapter(new SimpleFilterAdapter(tagsForFilter));
+        mFilter.setListener(filterListener);
+        mFilter.setNoSelectedItemText(getString(R.string.str_all_selected));
+        mFilter.build();
 
         //TO DO LIST
         activity.findViewById(R.id.btn_alarm).setOnClickListener(new View.OnClickListener() {
@@ -96,14 +142,15 @@ public class HomeFragment extends Fragment implements FilterListener<Tag> {
             }
         });
 
+        //刷新与加载
         swipeToLoadLayout = (SwipeToLoadLayout) activity.findViewById(R.id.swipeToLoadLayout);
         //下拉刷新
         swipeToLoadLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Log.i("setOnRefreshListener","onRefresh");
+                Log.i("setOnRefreshListener", "onRefresh");
                 mAllArticles.clear();
-                page=0;
+                page = 55;
                 getArticles();
             }
         });
@@ -111,7 +158,7 @@ public class HomeFragment extends Fragment implements FilterListener<Tag> {
         swipeToLoadLayout.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
             public void onLoadMore() {
-                Log.i("setOnLoadMoreListener","onLoadMore");
+                Log.i("setOnLoadMoreListener", "onLoadMore");
                 getArticles();
             }
         });
@@ -132,29 +179,32 @@ public class HomeFragment extends Fragment implements FilterListener<Tag> {
         articleAdapter.setOnItemClickListener(new ArticleAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-                Log.i(TAG,"articleAdapter.setOnItemClickListener:"+position);
-                Intent intent = new Intent(activity,ArticleDetailsActivity.class);
+                Log.i(TAG, "articleAdapter.setOnItemClickListener:" + position);
+                Intent intent = new Intent(activity, ArticleDetailsActivity.class);
                 Article article = mAllArticles.get(position);
-                intent.putExtra("text",article.getText());
-                intent.putExtra("img",article.getImg());
-                intent.putExtra("title",article.getTitle());
-                intent.putExtra("url",article.getUrl());
+                intent.putExtra("text", article.getText());
+                intent.putExtra("img", article.getImg());
+                intent.putExtra("title", article.getTitle());
+                intent.putExtra("url", article.getUrl());
                 startActivity(intent);
             }
         });
-
         getArticles();
     }
 
     @Override
     public void onPause() {
+        if (call != null)
+            call.cancel();
+        if (swipeToLoadLayout != null) {
+            if (swipeToLoadLayout.isRefreshing()) {
+                swipeToLoadLayout.setRefreshing(false);
+            }
+            if (swipeToLoadLayout.isLoadingMore()) {
+                swipeToLoadLayout.setLoadingMore(false);
+            }
+        }
         super.onPause();
-        if (swipeToLoadLayout.isRefreshing()) {
-            swipeToLoadLayout.setRefreshing(false);
-        }
-        if (swipeToLoadLayout.isLoadingMore()) {
-            swipeToLoadLayout.setLoadingMore(false);
-        }
     }
 
     private void calculateDiff(final List<Article> oldList, final List<Article> newList) {
@@ -163,14 +213,17 @@ public class HomeFragment extends Fragment implements FilterListener<Tag> {
             public int getOldListSize() {
                 return oldList.size();
             }
+
             @Override
             public int getNewListSize() {
                 return newList.size();
             }
+
             @Override
             public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
                 return oldList.get(oldItemPosition).equals(newList.get(newItemPosition));
             }
+
             @Override
             public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
                 return oldList.get(oldItemPosition).equals(newList.get(newItemPosition));
@@ -178,95 +231,95 @@ public class HomeFragment extends Fragment implements FilterListener<Tag> {
         }).dispatchUpdatesTo(articleAdapter);
     }
 
-    @Override
-    public void onNothingSelected() {
-        if (mRecyclerView != null) {
-            articleAdapter.setArticles(mAllArticles);
-            articleAdapter.notifyDataSetChanged();
-        }
-    }
-
     /**
      * 获取文章列表
      */
-    private void getArticles(){
+    private Call call;
+
+    private void getArticles() {
         avLoadingIndicatorView.show();
-        // step 1: 创建 OkHttpClient 对象
-        OkHttpClient okHttpClient = new OkHttpClient();
-        // step 2： 创建一个请求，不指定请求方法时默认是GET。
-        Request.Builder requestBuilder = new Request.Builder().url(Global.URL_HOME_ARTICLE_BASE+(--page)).method("GET",null);
-        // step 3：创建 Call 对象
-        Call call = okHttpClient.newCall(requestBuilder.build());
-        //step 4: 开始异步请求
-        call.enqueue(new Callback() {
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(3, TimeUnit.SECONDS).build();
+        Request request = new Request.Builder().url(Global.URL_HOME_ARTICLE_BASE + (--page)).method("GET", null).build();
+        call = okHttpClient.newCall(request);               // step 3：创建 Call 对象
+        call.enqueue(new Callback() {                       // step 4: 开始异步请求
             @Override
             public void onFailure(Call call, IOException e) {
-                //请求失败
-                Log.e(TAG,"getArticles::onFailure:"+e.getMessage());
+                Log.e(TAG, "getArticles::onFailure:" + e.getMessage());
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if(swipeToLoadLayout.isLoadingMore())
+                        if (swipeToLoadLayout.isLoadingMore())
                             swipeToLoadLayout.setLoadingMore(false);
-                        if(swipeToLoadLayout.isRefreshing())
+                        if (swipeToLoadLayout.isRefreshing())
                             swipeToLoadLayout.setRefreshing(false);
                         avLoadingIndicatorView.hide();
                     }
                 });
             }
+
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                //请求成功
-                Log.i(TAG,"getArticles::onResponse");
+            public void onResponse(Call call, Response response) {
                 try {
-                    JSONArray jsonArray = new JSONArray(response.body().string());
-                    for(int i=0;i<jsonArray.length();i++){
-                        JSONObject jsonObject = jsonArray.getJSONObject(i);
-                        Article article = new Article();
-                        article.setImg(jsonObject.getString("img"));
-                        article.setAuthorJobTitle(jsonObject.getString("authorJobTitle"));
-                        article.setTitle(jsonObject.getString("title"));
-                        article.setDate(jsonObject.getString("date"));
-                        article.setText(jsonObject.getString("text"));
-                        article.setUrl(jsonObject.getString("url"));
-                        JSONArray jsonArrayTags = new JSONArray(jsonObject.getString("tags"));
-                        List<Tag> tags = new ArrayList<>();
-                        for(int j=0;j<jsonArrayTags.length();j++){
-                            JSONObject jsonObjectTag = jsonArrayTags.getJSONObject(j);
-                            Tag tag = new Tag(jsonObjectTag.getString("text"),jsonObjectTag.getInt("color"));
-                            tags.add(tag);
-                            if(!tagsForFilter.contains(tag))
-                                tagsForFilter.add(tag);
-                        }
-                        article.setTags(tags);
-                        mAllArticles.add(article);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    onArticleResponse(response.body().string());
+                    afterArticleResponse();
+                } catch (IOException ignored) {
                 }
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(swipeToLoadLayout.isLoadingMore())
-                            swipeToLoadLayout.setLoadingMore(false);
-                        if(swipeToLoadLayout.isRefreshing())
-                            swipeToLoadLayout.setRefreshing(false);
-                        avLoadingIndicatorView.hide();
-                        mFilter = (Filter<Tag>) activity.findViewById(R.id.filter);
-                        mFilter.setListener(HomeFragment.this);
-                        mFilter.setNoSelectedItemText(getString(R.string.str_all_selected));
-                        mFilter.setAdapter(new Adapter(tagsForFilter));
-                        mFilter.build();
-                        Log.i(TAG,"length of tagsForFilter:"+tagsForFilter.size());
-                        articleAdapter.notifyDataSetChanged();
-                    }
-                });
+            }
+        });
+    }
+
+    private void onArticleResponse(String json) {
+        try {
+            JSONArray jsonArray = new JSONArray(json);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                Article article = new Article();
+                article.setImg(jsonObject.getString("img"));
+                article.setAuthorJobTitle(jsonObject.getString("authorJobTitle"));
+                article.setTitle(jsonObject.getString("title"));
+                article.setDate(jsonObject.getString("date"));
+                article.setText(jsonObject.getString("text"));
+                article.setUrl(jsonObject.getString("url"));
+                JSONArray jsonArrayTags = new JSONArray(jsonObject.getString("tags"));
+                List<Tag> tags = new ArrayList<>();
+                for (int j = 0; j < jsonArrayTags.length(); j++) {
+                    JSONObject jsonObjectTag = jsonArrayTags.getJSONObject(j);
+                    Tag tag = new Tag(jsonObjectTag.getString("text"), jsonObjectTag.getInt("color"));
+                    tags.add(tag);
+                    if (!tagsForFilter.contains(tag))
+                        tagsForFilter.add(tag);
+                }
+                article.setTags(tags);
+                mAllArticles.add(article);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 通知 UI 文章变更
+     */
+    private void afterArticleResponse() {
+        //请求成功
+        Log.i(TAG, "getArticles::afterArticleResponse");
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (swipeToLoadLayout.isLoadingMore())
+                    swipeToLoadLayout.setLoadingMore(false);
+                if (swipeToLoadLayout.isRefreshing())
+                    swipeToLoadLayout.setRefreshing(false);
+                avLoadingIndicatorView.hide();
+                Log.i(TAG, "length of tagsForFilter:" + tagsForFilter.size());
+                articleAdapter.notifyDataSetChanged();
             }
         });
     }
 
     /**
      * 查找标签
+     *
      * @param tags 标签
      * @return 结果
      */
@@ -283,36 +336,14 @@ public class HomeFragment extends Fragment implements FilterListener<Tag> {
         return articles;
     }
 
-    @Override
-    public void onFiltersSelected(@NotNull ArrayList<Tag> filters) {
-        Log.i(TAG,"onFiltersSelected");
-        List<Article> newArticles = findByTags(filters);
-        List<Article> oldArticles = articleAdapter.getArticles();
-        articleAdapter.setArticles(newArticles);
-        calculateDiff(oldArticles, newArticles);
-    }
-
-    @Override
-    public void onFilterSelected(Tag item) {
-        Log.i(TAG,"onFilterSelected");
-        if (item.getText().equals(articleAdapter.getArticles().get(0).getText())) {
-            mFilter.deselectAll();
-            mFilter.collapse();
-        }
-    }
-
-    @Override
-    public void onFilterDeselected(Tag item) {
-        Log.i(TAG,"onFilterDeselected");
-    }
-
     /**
      * 标签适配器
      */
-    class Adapter extends FilterAdapter<Tag> {
-        Adapter(@NotNull List<? extends Tag> items) {
+    class SimpleFilterAdapter extends FilterAdapter<Tag> {
+        SimpleFilterAdapter(@NotNull List<? extends Tag> items) {
             super(items);
         }
+
         @NotNull
         @Override
         public FilterItem createView(int position, Tag item) {
